@@ -1,0 +1,50 @@
+# =============================================================
+# Git Ignore — Network Compliance System
+# =============================================================
+
+# Environment files (NEVER commit these)
+.env
+*.env.local
+*.env.*.local
+
+# ---- Java / Maven ----
+**/target/
+backend/.mvn/
+*.class
+*.jar
+*.war
+*.ear
+*.log
+
+# ---- Node / npm ----
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+*.npm
+
+# ---- Python ----
+ai-service/__pycache__/
+ai-service/**/__pycache__/
+ai-service/*.pyc
+ai-service/**/*.pyc
+ai-service/venv/
+ai-service/.venv/
+ai-service/*.egg-info/
+
+# ---- IDE ----
+.idea/
+.vscode/settings.json
+*.iml
+.DS_Store
+Thumbs.db
+
+# ---- Docker ----
+docker-compose.override.yml
+
+# ---- Logs ----
+*.log
+logs/
+
+# ---- Database ----
+*.dump
+*.sql.bak

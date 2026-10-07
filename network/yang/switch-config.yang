@@ -1,0 +1,87 @@
+module switch-config {
+  namespace "urn:switch-config";
+  prefix sc;
+
+  organization "NMS Compliance Project";
+  description
+    "YANG model for network switch configuration compliance.
+     Covers security, VLAN, spanning-tree, and port security parameters.";
+
+  revision 2024-01-01 {
+    description "Initial revision";
+  }
+
+  container switch {
+    description "Switch configuration container";
+
+    leaf hostname {
+      type string;
+      description "Switch hostname";
+    }
+
+    container security {
+      description "Switch security configuration";
+
+      leaf ssh-enabled {
+        type boolean;
+        default true;
+        description "SSH must be enabled";
+      }
+
+      leaf telnet-enabled {
+        type boolean;
+        default false;
+        description "Telnet must be disabled";
+      }
+
+      leaf port-security-enabled {
+        type boolean;
+        default true;
+        description
+          "Port security must be enabled on access ports.
+           Prevents MAC flooding attacks.";
+      }
+    }
+
+    container layer2 {
+      description "Layer 2 configuration";
+
+      leaf spanning-tree-enabled {
+        type boolean;
+        default true;
+        description
+          "Spanning Tree Protocol must be enabled to prevent loops.
+           Use Rapid-PVST or MSTP in production.";
+      }
+
+      leaf dhcp-snooping-enabled {
+        type boolean;
+        default true;
+        description
+          "DHCP snooping must be enabled to prevent rogue DHCP servers.";
+      }
+    }
+
+    container management {
+      description "Management plane configuration";
+
+      leaf ntp-enabled {
+        type boolean;
+        default true;
+        description "NTP must be enabled";
+      }
+
+      leaf snmp-enabled {
+        type boolean;
+        default true;
+        description "SNMP must be enabled for monitoring";
+      }
+
+      leaf logging-enabled {
+        type boolean;
+        default true;
+        description "Syslog logging must be enabled";
+      }
+    }
+  }
+}

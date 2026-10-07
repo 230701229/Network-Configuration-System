@@ -1,0 +1,11 @@
+package com.nms.compliance.repository;
+
+import com.nms.compliance.entity.Alert;
+import org.springframework.data.jpa.repository.JpaRepository;
+import java.util.List;
+
+public interface AlertRepository extends JpaRepository<Alert, Long> {
+    List<Alert> findByStatus(Alert.AlertStatus status);
+    List<Alert> findByDeviceIdAndStatus(Long deviceId, Alert.AlertStatus status);
+    List<Alert> findByStatusOrderByDetectedAtDesc(Alert.AlertStatus status);
+}

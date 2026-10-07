@@ -1,0 +1,115 @@
+services:
+  # =====================================================================
+  # PostgreSQL Database
+  # =====================================================================
+  postgres:
+    image: postgres:15-alpine
+    container_name: nms-postgres
+    environment:
+      POSTGRES_DB: nms_compliance
+      POSTGRES_USER: nms_user
+      POSTGRES_PASSWORD: nms_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/schema/001_create_schema.sql:/docker-entrypoint-initdb.d/01_schema.sql
+      - ./database/seed/seed_demo_data.sql:/docker-entrypoint-initdb.d/02_seed.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nms_user -d nms_compliance"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - nms-network
+
+  # =====================================================================
+  # Spring Boot Backend
+  # =====================================================================
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: nms-backend
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: nms_compliance
+      DB_USERNAME: nms_user
+      DB_PASSWORD: nms_password
+      JWT_SECRET: ${JWT_SECRET:-your-super-secret-jwt-key-for-production-change-this}
+      JWT_EXPIRATION_MS: 86400000
+      AI_SERVICE_URL: http://ai-service:8000
+      AI_SERVICE_ENABLED: true
+      BACKEND_API_KEY: ${BACKEND_API_KEY:-internal-secret}
+      COMPLIANCE_SCAN_ENABLED: true
+      COMPLIANCE_SCAN_INTERVAL_MS: 1800000
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:-default-32-char-encryption-key!!}
+      FRONTEND_URL: http://localhost:5173
+      SERVER_PORT: 8080
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    networks:
+      - nms-network
+    restart: unless-stopped
+
+  # =====================================================================
+  # Python FastAPI AI Service
+  # =====================================================================
+  ai-service:
+    build:
+      context: ./ai-service
+      dockerfile: Dockerfile
+    container_name: nms-ai-service
+    environment:
+      LLM_PROVIDER: ${LLM_PROVIDER:-gemini}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_MODEL: gemini-1.5-flash
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_MODEL: gpt-4o-mini
+      BACKEND_API_KEY: ${BACKEND_API_KEY:-internal-secret}
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health', timeout=5)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - nms-network
+    restart: unless-stopped
+
+  # =====================================================================
+  # React Frontend (served via Nginx)
+  # =====================================================================
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: /api
+    container_name: nms-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - nms-network
+    restart: unless-stopped
+
+networks:
+  nms-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local

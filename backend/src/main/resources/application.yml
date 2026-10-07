@@ -1,0 +1,48 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:nms_compliance}?stringtype=unspecified
+    username: ${DB_USERNAME:nms_user}
+    password: ${DB_PASSWORD:nms_password}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: false
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    properties:
+      hibernate:
+        format_sql: true
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+
+server:
+  port: ${SERVER_PORT:8080}
+
+jwt:
+  secret: ${JWT_SECRET:defaultSecretKeyForDevelopmentOnlyChangeInProduction12345}
+  expiration: ${JWT_EXPIRATION_MS:86400000}
+
+ai:
+  service:
+    url: ${AI_SERVICE_URL:http://localhost:8000}
+    enabled: ${AI_SERVICE_ENABLED:true}
+
+compliance:
+  scan:
+    enabled: ${COMPLIANCE_SCAN_ENABLED:true}
+    interval: ${COMPLIANCE_SCAN_INTERVAL_MS:1800000}
+
+drift:
+  scan:
+    enabled: ${DRIFT_SCAN_ENABLED:true}
+    interval: ${DRIFT_SCAN_INTERVAL_MS:5000}
+
+encryption:
+  key: ${ENCRYPTION_KEY:defaultEncryptionKey123456}
+
+logging:
+  level:
+    com.nms: DEBUG
+  pattern:
+    console: '%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n'

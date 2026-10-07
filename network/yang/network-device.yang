@@ -1,0 +1,171 @@
+module network-device {
+  namespace "urn:network-device";
+  prefix nd;
+
+  organization "NMS Compliance Project";
+  contact "admin@nms.local";
+  description
+    "YANG model defining the configuration and operational state
+     of a network device for compliance checking purposes.
+
+     This model is used by the compliance engine to validate
+     device configurations against approved policies.";
+
+  revision 2024-01-01 {
+    description "Initial revision";
+    reference "NMS Compliance System v1.0";
+  }
+
+  typedef severity-type {
+    type enumeration {
+      enum critical { description "Critical severity"; }
+      enum high     { description "High severity"; }
+      enum medium   { description "Medium severity"; }
+      enum low      { description "Low severity"; }
+      enum info     { description "Informational"; }
+    }
+  }
+
+  container system {
+    description "System-level configuration parameters";
+
+    leaf hostname {
+      type string {
+        length "1..255";
+      }
+      description "The fully qualified device hostname";
+    }
+
+    container security {
+      description "Security-related configuration";
+
+      leaf ssh-enabled {
+        type boolean;
+        default true;
+        description
+          "Indicates whether SSH is enabled for remote management.
+           SSH MUST be enabled (true) for secure access.";
+      }
+
+      leaf telnet-enabled {
+        type boolean;
+        default false;
+        description
+          "Indicates whether Telnet is enabled.
+           Telnet MUST be disabled (false) as it is insecure.
+           Telnet transmits credentials in plaintext.";
+      }
+
+      leaf http-enabled {
+        type boolean;
+        default false;
+        description
+          "Indicates whether the HTTP management interface is enabled.
+           HTTP MUST be disabled (false). Use HTTPS instead.";
+      }
+
+      leaf https-enabled {
+        type boolean;
+        default true;
+        description
+          "Indicates whether the HTTPS management interface is enabled.
+           HTTPS SHOULD be enabled (true) for secure web management.";
+      }
+
+      leaf password-encryption {
+        type boolean;
+        default true;
+        description
+          "Indicates whether password encryption service is enabled.
+           All stored passwords MUST be encrypted.";
+      }
+
+      leaf banner-configured {
+        type boolean;
+        default false;
+        description
+          "Indicates whether a login banner/MOTD is configured.
+           A banner SHOULD be configured for legal notification.";
+      }
+
+      leaf max-login-attempts {
+        type uint8 {
+          range "1..10";
+        }
+        default 5;
+        description
+          "Maximum number of failed login attempts before lockout.
+           Recommended value is 3-5.";
+      }
+    }
+
+    container time {
+      description "Time synchronization configuration";
+
+      leaf ntp-enabled {
+        type boolean;
+        default true;
+        description
+          "Indicates whether NTP (Network Time Protocol) is enabled.
+           NTP MUST be enabled for accurate time synchronization.
+           Accurate time is critical for log analysis and security.";
+      }
+
+      leaf ntp-server {
+        type string;
+        description "Primary NTP server address";
+      }
+    }
+
+    container management {
+      description "Network management configuration";
+
+      leaf snmp-enabled {
+        type boolean;
+        default true;
+        description
+          "Indicates whether SNMP is enabled for monitoring.
+           SNMP SHOULD be enabled for network monitoring capabilities.";
+      }
+
+      leaf snmp-version {
+        type enumeration {
+          enum v2c { description "SNMPv2c"; }
+          enum v3  { description "SNMPv3 (recommended)"; }
+        }
+        default v3;
+        description "SNMP version in use. SNMPv3 is recommended.";
+      }
+
+      leaf logging-enabled {
+        type boolean;
+        default true;
+        description
+          "Indicates whether syslog logging is enabled.
+           Logging MUST be enabled for audit trail and troubleshooting.";
+      }
+
+      leaf syslog-server {
+        type string;
+        description "Syslog server address";
+      }
+    }
+
+    container routing {
+      description "Routing protocol configuration";
+
+      leaf ospf-enabled {
+        type boolean;
+        default false;
+        description
+          "Indicates whether OSPF dynamic routing is enabled.
+           Required for routers participating in OSPF routing domain.";
+      }
+
+      leaf ospf-area {
+        type string;
+        description "OSPF area identifier (e.g., 0.0.0.0 for backbone)";
+      }
+    }
+  }
+}

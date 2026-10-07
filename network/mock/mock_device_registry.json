@@ -1,0 +1,145 @@
+{
+  "mockDevices": [
+    {
+      "hostname": "Router-01",
+      "ipAddress": "192.168.1.1",
+      "deviceType": "ROUTER",
+      "vendor": "Cisco",
+      "model": "ISR4331",
+      "description": "Core router - fully compliant",
+      "baseConfiguration": {
+        "ssh": "true",
+        "telnet": "false",
+        "ntp": "true",
+        "snmp": "true",
+        "ospf": "true",
+        "http": "false",
+        "https": "true",
+        "logging": "true",
+        "password_encryption": "true",
+        "banner_configured": "true",
+        "max_login_attempts": "5"
+      },
+      "expectedComplianceScore": 100,
+      "notes": "Baseline compliant device for demonstration"
+    },
+    {
+      "hostname": "Router-02",
+      "ipAddress": "192.168.1.2",
+      "deviceType": "ROUTER",
+      "vendor": "Cisco",
+      "model": "ISR4331",
+      "description": "Distribution router - has telnet enabled and NTP missing",
+      "baseConfiguration": {
+        "ssh": "true",
+        "telnet": "true",
+        "ntp": "false",
+        "snmp": "true",
+        "ospf": "true",
+        "http": "false",
+        "https": "false",
+        "logging": "true",
+        "password_encryption": "true",
+        "banner_configured": "false",
+        "max_login_attempts": "10"
+      },
+      "expectedComplianceScore": 62.5,
+      "violations": [
+        {"parameter": "telnet", "expected": "false", "actual": "true", "severity": "CRITICAL"},
+        {"parameter": "ntp", "expected": "true", "actual": "false", "severity": "MEDIUM"},
+        {"parameter": "https", "expected": "true", "actual": "false", "severity": "HIGH"}
+      ],
+      "notes": "Demonstrates telnet enabled drift scenario"
+    },
+    {
+      "hostname": "Router-03",
+      "ipAddress": "192.168.1.3",
+      "deviceType": "ROUTER",
+      "vendor": "Cisco",
+      "model": "ISR4451",
+      "description": "Branch router - severely non-compliant",
+      "baseConfiguration": {
+        "ssh": "false",
+        "telnet": "true",
+        "ntp": "false",
+        "snmp": "false",
+        "ospf": "false",
+        "http": "true",
+        "https": "false",
+        "logging": "false",
+        "password_encryption": "false",
+        "banner_configured": "false",
+        "max_login_attempts": "10"
+      },
+      "expectedComplianceScore": 0,
+      "violations": [
+        {"parameter": "ssh", "expected": "true", "actual": "false", "severity": "HIGH"},
+        {"parameter": "telnet", "expected": "false", "actual": "true", "severity": "CRITICAL"},
+        {"parameter": "ntp", "expected": "true", "actual": "false", "severity": "MEDIUM"},
+        {"parameter": "snmp", "expected": "true", "actual": "false", "severity": "MEDIUM"},
+        {"parameter": "ospf", "expected": "true", "actual": "false", "severity": "HIGH"},
+        {"parameter": "http", "expected": "false", "actual": "true", "severity": "HIGH"},
+        {"parameter": "logging", "expected": "true", "actual": "false", "severity": "MEDIUM"},
+        {"parameter": "password_encryption", "expected": "true", "actual": "false", "severity": "HIGH"}
+      ],
+      "notes": "Worst-case scenario demonstration device"
+    },
+    {
+      "hostname": "Switch-01",
+      "ipAddress": "192.168.2.1",
+      "deviceType": "SWITCH",
+      "vendor": "Cisco",
+      "model": "C9300-48P",
+      "description": "Core switch - mostly compliant, missing port security and DHCP snooping",
+      "baseConfiguration": {
+        "ssh": "true",
+        "telnet": "false",
+        "ntp": "true",
+        "snmp": "true",
+        "spanning_tree": "true",
+        "port_security": "false",
+        "dhcp_snooping": "false",
+        "logging": "true"
+      },
+      "expectedComplianceScore": 71.4,
+      "violations": [
+        {"parameter": "port_security", "expected": "true", "actual": "false", "severity": "MEDIUM"},
+        {"parameter": "dhcp_snooping", "expected": "true", "actual": "false", "severity": "MEDIUM"}
+      ],
+      "notes": "Demonstrates medium-severity drift on a switch"
+    },
+    {
+      "hostname": "Switch-02",
+      "ipAddress": "192.168.2.2",
+      "deviceType": "SWITCH",
+      "vendor": "Cisco",
+      "model": "C9300-24T",
+      "description": "Access switch - fully compliant",
+      "baseConfiguration": {
+        "ssh": "true",
+        "telnet": "false",
+        "ntp": "true",
+        "snmp": "true",
+        "spanning_tree": "true",
+        "port_security": "true",
+        "dhcp_snooping": "true",
+        "logging": "true"
+      },
+      "expectedComplianceScore": 100,
+      "notes": "Fully compliant switch baseline"
+    }
+  ],
+  "driftSimulation": {
+    "description": "When drift simulation is triggered for Router-01, apply these overrides",
+    "targetHostname": "Router-01",
+    "driftOverrides": {
+      "telnet": "true",
+      "ntp": "false"
+    },
+    "expectedScoreAfterDrift": 75,
+    "newViolations": [
+      {"parameter": "telnet", "expected": "false", "actual": "true", "severity": "CRITICAL"},
+      {"parameter": "ntp", "expected": "true", "actual": "false", "severity": "MEDIUM"}
+    ]
+  }
+}
